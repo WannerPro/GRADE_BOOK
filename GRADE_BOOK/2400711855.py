@@ -2,16 +2,25 @@ import json
 import statistics
 
 
-# Student Information
-STUDENT_NAME = "WANGODA FRANCIS"
-STUDENT_NUMBER = "2400711855"
-REGISTRATION_NUMBER = "24/U/11855/PS"
+# Student identification constants
+STUDENT_NAME = "JOHN DOE"
+STUDENT_NUMBER = "290000198"
+REGISTRATION_NUMBER = "88/U/0198/PS"
 
 
-# Student class
 class Student:
+    """
+    A class to represent a student and their academic records.
+    Handles individual student data including admin number, name, and subject marks.
+    """
     def __init__(self, admin_no, name):
-        # Initialising the student details and setting default marks to be zero
+        """
+        Initialize a new student with their basic information and empty marks.
+        
+        Args:
+            admin_no (str): Student's administrative number
+            name (str): Student's full name
+        """
         self.admin_no = admin_no
         self.name = name
         self.marks = {
@@ -21,31 +30,66 @@ class Student:
             "Science": 0,
         }
         
-    # setting marks for a specific subject
     def set_marks(self, subject, marks):
+        """
+        Set marks for a specific subject with validation.
+        
+        Args:
+            subject (str): Subject name
+            marks (int): Marks to be set (must be between 0 and 100)
+            
+        Returns:
+            bool: True if marks were set successfully, False otherwise
+        """
         if subject in self.marks and 0 <= marks <= 100:
             self.marks[subject] = marks
             return True
         return False
     
-    # getting the student marks
     def get_marks(self, subject):
+        """
+        Retrieve marks for a specific subject.
+        
+        Args:
+            subject (str): Subject name
+            
+        Returns:
+            int or None: Marks if valid, None if invalid
+        """
         return self.marks.get(subject) if 0 <= self.marks.get(subject) <= 100 else None
     
-    # Editing the marks of the student
     def edit_marks(self, subject, new_marks):
+        """
+        Edit existing marks for a subject.
+        
+        Args:
+            subject (str): Subject name
+            new_marks (int): New marks to be set
+            
+        Returns:
+            bool or None: True if edit successful, False/None if failed
+        """
         return self.set_marks(subject, new_marks) if subject else None
 
 
-# Grade book class
 class Gradebook:
+    """
+    A class to manage the entire gradebook system.
+    Handles operations like adding/removing students, managing grades, and generating statistics.
+    """
     def __init__(self, filename='previous_data.json'):
+        """
+        Initialize gradebook with data from a JSON file.
+        
+        Args:
+            filename (str): Path to the JSON file storing gradebook data
+        """
         self.filename = filename
         self.students = {}
         self.load_data()
     
-    # Loading the existing data
     def load_data(self):
+        """Load existing student data from JSON file into memory."""
         try:
             with open(self.filename, 'r') as file:
                 data = json.load(file)
@@ -56,34 +100,64 @@ class Gradebook:
         except FileNotFoundError:
             print("Error! the file not found")
     
-    # Saving the data onto the file
     def save_data(self):
-        data = {admin_no:{"name": student.name,"marks": student.marks} for admin_no, student in self.students.items()}
+        """Save current student data to JSON file."""
+        data = {admin_no:{"name": student.name,"marks": student.marks} 
+                for admin_no, student in self.students.items()}
         with open(self.filename, 'w') as file:
             json.dump(data, file, indent=4)
 
-    # Adding a student to the grade book
     def add_student(self, student):
+        """
+        Add a new student to the gradebook.
+        
+        Args:
+            student (Student): Student object to add
+            
+        Returns:
+            bool: True if student added successfully, False if student already exists
+        """
         if student.admin_no not in self.students:
             self.students[student.admin_no] = student
             self.save_data()
             return True
         return False
     
-    # Returning student data
     def get_student(self, admin_no):
-        return self.students.get(admin_no) if self.students.get(admin_no) else None
+        """
+        Retrieve a student's information.
+        
+        Args:
+            admin_no (str): Student's administrative number
+            
+        Returns:
+            Student or None: Student object if found, None otherwise
+        """
+        return self.students.get(admin_no)
     
-    # deleting a student from the system (grade book)
     def delete_student(self, admin_no):
+        """
+        Remove a student from the gradebook.
+        
+        Args:
+            admin_no (str): Student's administrative number
+            
+        Returns:
+            bool: True if student deleted successfully, False if student not found
+        """
         if admin_no in self.students:
             del self.students[admin_no]
             self.save_data()
             return True
         return False
     
-    # Viewing subject statistics
     def view_statistics(self):
+        """
+        Calculate and return statistical analysis of grades for all subjects.
+        
+        Returns:
+            dict: Dictionary containing statistical measures for each subject
+        """
         # Initialize subject marks dictionary
         subject_marks = {subject: [] for subject in ["Maths", "SST", "English", "Science"]}
         
@@ -121,30 +195,43 @@ class Gradebook:
         
         return grade_stats
     
-    # View the grades of a particular student
     def view_student_grades(self, admin_no):
+        """
+        Get all grades for a specific student.
+        
+        Args:
+            admin_no (str): Student's administrative number
+            
+        Returns:
+            dict or None: Dictionary of student's grades if found, None otherwise
+        """
         student = self.get_student(admin_no)
         if student:
-            student_grades = {
+            return {
                 'Maths': student.marks["Maths"],
                 'English': student.marks["English"],
                 'Science': student.marks["Science"],
                 'SST': student.marks["SST"]
             }
-            return student_grades
         else:
             print("Student does not exist in the system!")
 
-    # these are the details of the gradebook
     def print_gradebook(self):
-        gradebook_details = {
+        """
+        Get summary of all students in the gradebook.
+        
+        Returns:
+            dict: Dictionary containing total number of students and their details
+        """
+        return {
             'total_students': len(self.students),
-            'student_details': {admin_no: student.name for admin_no, student in self.students.items()}
+            'student_details': {admin_no: student.name 
+                              for admin_no, student in self.students.items()}
         }
-        return gradebook_details
 
-# This is a menu for the user interaction
+
 def print_menu():
+    """Display the main menu options for the gradebook system."""
     print("--------------------Menu--------------------")
     print("1 - Add student")
     print("2 - Delete student, given an admin_no")
@@ -157,8 +244,11 @@ def print_menu():
     print("q - Quit system\n")
 
 
-# this function will be used to run the gradebook
 def main():
+    """
+    Main function to run the gradebook application.
+    Handles user interaction and menu choices.
+    """
     gradebook = Gradebook()
     while True:
         print_menu()
