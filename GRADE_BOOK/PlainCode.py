@@ -1,20 +1,38 @@
-# importing modules
-import json
-import statistics
+"""
+Gradebook Management System
+A command-line application for managing student grades and academic records.
+Author: WANGODA FRANCIS
+Student Number: 2400711855
+"""
+
+# Import required standard libraries
+import json          # For handling JSON data storage
+import statistics    # For statistical calculations
 
 
-# Student Information
+# Student identification constants
 STUDENT_NAME = "WANGODA FRANCIS"
 STUDENT_NUMBER = "2400711855"
 REGISTRATION_NUMBER = "24/U/11855/PS"
 
 
-# Student class
 class Student:
+    """
+    Class representing a student with their personal details and academic marks.
+    Handles individual student data management including marks for different subjects.
+    """
+    
     def __init__(self, admin_no, name):
-        # Initialising the student details and setting default marks to be zero
+        """
+        Initialize a new student with their basic information.
+        
+        Args:
+            admin_no (str): Student's administrative number
+            name (str): Student's full name
+        """
         self.admin_no = admin_no
         self.name = name
+        # Initialize default marks as 0 for all subjects
         self.marks = {
             "Maths": 0,
             "SST": 0,
@@ -22,34 +40,74 @@ class Student:
             "Science": 0,
         }
         
-    # setting marks for a specific subject
     def set_marks(self, subject, marks):
+        """
+        Set marks for a specific subject with validation.
+        
+        Args:
+            subject (str): Subject name
+            marks (int): Marks to be set (must be between 0 and 100)
+            
+        Returns:
+            bool: True if marks were set successfully, False if validation fails
+        """
         if subject in self.marks and 0 <= marks <= 100:
             self.marks[subject] = marks
             return True
         return False
     
-    # getting the student marks
     def get_marks(self, subject):
+        """
+        Retrieve marks for a specific subject with validation.
+        
+        Args:
+            subject (str): Subject name
+            
+        Returns:
+            int or None: Marks if valid, None if invalid
+        """
         return self.marks.get(subject) if 0 <= self.marks.get(subject) <= 100 else None
     
-    # Editing the marks of the student
     def edit_marks(self, subject, new_marks):
+        """
+        Edit existing marks for a subject.
+        
+        Args:
+            subject (str): Subject name
+            new_marks (int): New marks to be set
+            
+        Returns:
+            bool or None: True if edit successful, False/None if failed
+        """
         return self.set_marks(subject, new_marks) if subject else None
 
 
-# Grade book class
 class Gradebook:
+    """
+    Class managing the entire gradebook system.
+    Handles operations like adding/removing students and grade management.
+    """
+    
     def __init__(self, filename='previous_data.json'):
+        """
+        Initialize gradebook and load existing data.
+        
+        Args:
+            filename (str): Path to JSON file storing gradebook data
+        """
         self.filename = filename
-        self.students = {}
+        self.students = {}  # Dictionary to store student objects
         self.load_data()
     
-    # Loading the existing data
     def load_data(self):
+        """
+        Load existing student data from JSON file into memory.
+        Handles FileNotFoundError if data file doesn't exist.
+        """
         try:
             with open(self.filename, 'r') as file:
                 data = json.load(file)
+                # Create Student objects from JSON data
                 for admin_no, info in data.items():
                     student = Student(admin_no, info['name'])
                     student.marks = info["marks"]
@@ -57,49 +115,85 @@ class Gradebook:
         except FileNotFoundError:
             print("Error! the file not found")
     
-    # Saving the data onto the file
     def save_data(self):
-        data = {admin_no:{"name": student.name,"marks": student.marks} for admin_no, student in self.students.items()}
+        """
+        Save current student data to JSON file.
+        Converts student objects to dictionary format for JSON storage.
+        """
+        data = {admin_no:{"name": student.name,"marks": student.marks} 
+                for admin_no, student in self.students.items()}
         with open(self.filename, 'w') as file:
             json.dump(data, file, indent=4)
 
-    # Adding a student to the grade book
     def add_student(self, student):
+        """
+        Add a new student to the gradebook.
+        
+        Args:
+            student (Student): Student object to add
+            
+        Returns:
+            bool: True if student added successfully, False if already exists
+        """
         if student.admin_no not in self.students:
             self.students[student.admin_no] = student
             self.save_data()
             return True
         return False
     
-    # Returning student data
     def get_student(self, admin_no):
-        return self.students.get(admin_no) if self.students.get(admin_no) else None
+        """
+        Retrieve a student's information.
+        
+        Args:
+            admin_no (str): Student's administrative number
+            
+        Returns:
+            Student or None: Student object if found, None if not found
+        """
+        return self.students.get(admin_no)
     
-    # deleting a student from the system (grade book)
     def delete_student(self, admin_no):
+        """
+        Remove a student from the gradebook.
+        
+        Args:
+            admin_no (str): Student's administrative number
+            
+        Returns:
+            bool: True if student deleted successfully, False if not found
+        """
         if admin_no in self.students:
             del self.students[admin_no]
             self.save_data()
             return True
         return False
     
-    # Viewing subject statistics
     def view_statistics(self):
-        # Initialize subject marks dictionary
+        """
+        Calculate and return statistical analysis of grades for all subjects.
+        Includes average, max, min, mode, and mode frequency for each subject.
+        
+        Returns:
+            dict: Dictionary containing statistical measures for each subject
+        """
+        # Initialize dictionary to collect marks for each subject
         subject_marks = {subject: [] for subject in ["Maths", "SST", "English", "Science"]}
         
-        # Collecting marks for each student
+        # Collect valid marks for each subject from all students
         for student in self.students.values():
             for subject in subject_marks:
                 mark = student.get_marks(subject)
                 if mark is not None:
                     subject_marks[subject].append(mark)
 
-        # Helper functions for statistics calculations
+        # Helper functions for statistical calculations
         def calc_average(marks):
+            """Calculate average of marks list"""
             return format(sum(marks) / len(marks), '.4f') if marks else None
         
         def calc_mode_freq(marks):
+            """Calculate mode and its frequency from marks list"""
             if not marks:
                 return "No mode", "No Frequency"
             mode_value = statistics.mode(marks)
@@ -122,30 +216,43 @@ class Gradebook:
         
         return grade_stats
     
-    # View the grades of a particular student
     def view_student_grades(self, admin_no):
+        """
+        Get all grades for a specific student.
+        
+        Args:
+            admin_no (str): Student's administrative number
+            
+        Returns:
+            dict or None: Dictionary of student's grades if found
+        """
         student = self.get_student(admin_no)
         if student:
-            student_grades = {
+            return {
                 'Maths': student.marks["Maths"],
                 'English': student.marks["English"],
                 'Science': student.marks["Science"],
                 'SST': student.marks["SST"]
             }
-            return student_grades
         else:
             print("Student does not exist in the system!")
 
-    # these are the details of the gradebook
     def print_gradebook(self):
-        gradebook_details = {
+        """
+        Get summary of all students in the gradebook.
+        
+        Returns:
+            dict: Dictionary containing total number of students and their details
+        """
+        return {
             'total_students': len(self.students),
-            'student_details': {admin_no: student.name for admin_no, student in self.students.items()}
+            'student_details': {admin_no: student.name 
+                              for admin_no, student in self.students.items()}
         }
-        return gradebook_details
 
-# This is a menu for the user interaction
+
 def print_menu():
+    """Display the main menu options for the gradebook system."""
     print("--------------------Menu--------------------")
     print("1 - Add student")
     print("2 - Delete student, given an admin_no")
@@ -158,14 +265,22 @@ def print_menu():
     print("q - Quit system\n")
 
 
-# this function will be used to run the gradebook
 def main():
+    """
+    Main function to run the gradebook application.
+    Handles user interaction and menu choices.
+    """
+    # Initialize gradebook
     gradebook = Gradebook()
+    
+    # Main program loop
     while True:
         print_menu()
         choice = input("Select an option: ").strip().lower()
         
+        # Handle user choices
         if choice == '1':
+            # Add new student
             admin_no = input("Enter Admin Number: ").strip()
             name = input("Enter Student Name: ").strip()
             student = Student(admin_no,name)
@@ -175,6 +290,7 @@ def main():
                 print(f"Student with Admin Number {admin_no} already exists.")
         
         elif choice == '2':
+            # Delete existing student
             admin_no = input("Enter Admin Number to delete: ").strip()
             if gradebook.delete_student(admin_no):
                 print(f"Student with Admin Number {admin_no} deleted!")
@@ -182,6 +298,7 @@ def main():
                 print("Student not found!")
 
         elif choice == '3':
+            # View statistical analysis
             stats = gradebook.view_statistics()
             for stat, value in stats.items():
                 print("-"*50)
@@ -189,6 +306,7 @@ def main():
                 print("-"*50)
 
         elif choice == '4':
+            # View individual student grades
             admin_no = input("Enter Admin Number to view grades: ").strip()
             grades = gradebook.view_student_grades(admin_no)
             if grades is not None:
@@ -198,6 +316,7 @@ def main():
                 print("Student not found.")
 
         elif choice == '5':
+            # Edit student grades
             admin_no = input("Enter Admin Number to edit grades: ").strip()
             student = gradebook.get_student(admin_no)
             if student:
@@ -211,31 +330,36 @@ def main():
                             print("-"*50)
                         else:
                             print("Invalid subject marks.")
-
                     elif choice == 'N' or choice == "":
                         print("Operation cancelled!")
             else:
                 print("Student not found!")
 
         elif choice == '6':
-            data = gradebook_details = gradebook.print_gradebook()
+            # Print gradebook summary
+            data = gradebook.print_gradebook()
             for key, value in data.items():
                 print(f"{key}: {value}")
-                
 
         elif choice == 'm':
+            # Show menu again
             print_menu()
 
         elif choice == 'c':
-            print("\033c", end="")  # Clear screen
+            # Clear screen
+            print("\033c", end="")
 
         elif choice == 'q':
+            # Save and quit
             gradebook.save_data()
             print("Exiting the system. Goodbye!")
             break
+            
         else:
+            # Handle invalid input
             print("Invalid choice. Please try again.")
 
 
+# Entry point of the program
 if __name__ == "__main__":
     main()
