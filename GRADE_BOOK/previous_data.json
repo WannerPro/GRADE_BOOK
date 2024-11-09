@@ -1,0 +1,29 @@
+{
+    "2000": {
+        "name": "Francis",
+        "marks": {
+            "Maths": 99,
+            "SST": 99,
+            "English": 99,
+            "Science": 99
+        }
+    },
+    "2001": {
+        "name": "John Doe",
+        "marks": {
+            "Maths": 99,
+            "SST": 99,
+            "English": 99,
+            "Science": 99
+        }
+    },
+    "2002": {
+        "name": "Jane Smith",
+        "marks": {
+            "Maths": 0,
+            "SST": 0,
+            "English": 0,
+            "Science": 0
+        }
+    }
+}
