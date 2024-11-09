@@ -1,26 +1,24 @@
-# Student Gradebook Management System
+# Gradebook Management System
 
-A Python-based command-line application for managing student grades and generating statistical analysis of academic performance.
+A command-line application for managing student grades and academic records.
 
 ## Features
 
 - Add and remove students
-- Record and edit grades for multiple subjects (Mathematics, Science, English, SST)
+- Record and edit grades for multiple subjects
 - View individual student grades
-- Generate detailed statistical analysis including:
-  - Average scores per subject
-  - Maximum and minimum grades
-  - Mode and frequency analysis
-- Persistent data storage using JSON
-- Simple command-line interface
+- Generate statistical analysis of grades
+- Save data persistently using JSON
+- Simple and intuitive command-line interface
 
 ## Requirements
 
-- Python 3.6+
-- Required modules:
+- Python 3.x
+- Required Python packages:
   - json (built-in)
   - statistics (built-in)
+  - names (pip install names)  # Only needed if generating sample data
 
 ## Installation
 
-1. Clone this repository: 
+1. Clone the repository:
