@@ -2,6 +2,10 @@ import json
 import statistics
 import time
 import sys
+from colorama import init, Fore, Back, Style
+
+# Initialize colorama
+init(autoreset=True)
 
 # Student identification constants
 STUDENT_NAME = "JOHN DOE"
@@ -232,74 +236,99 @@ class Gradebook:
 
 
 def print_with_animation(text, delay=0.03):
-    """Print text with a typewriter animation effect."""
+    """
+    Print text with a typewriter animation effect.
+    
+    Args:
+        text (str): Text to print
+        delay (float): Delay between each character
+    """
     for char in text:
-        print(char, end='', flush=True)
+        sys.stdout.write(char)
+        sys.stdout.flush()
         time.sleep(delay)
     print()
 
 def loading_animation(duration=1):
-    """Display a simple loading animation."""
-    for _ in range(int(duration * 10)):
-        for char in '.....':
-            print(f'\rLoading{char * 3}', end='', flush=True)
-            time.sleep(0.1)
-    print('\r' + ' ' * 20 + '\r', end='')
+    """
+    Display a loading animation.
+    
+    Args:
+        duration (float): Duration of the animation in seconds
+    """
+    animation = "|/-\\"
+    idx = 0
+    start = time.time()
+    while time.time() - start < duration:
+        print(f"\r{Fore.YELLOW}Loading... {animation[idx % len(animation)]}", end="")
+        idx += 1
+        time.sleep(0.1)
+    print("\r" + " " * 20 + "\r", end="")
 
 def print_menu():
-    """Display the main menu options."""
-    # Clear screen (using simple newlines instead of ANSI codes)
-    print('\n' * 50)
+    """Display the main menu options for the gradebook system with colors and animations."""
+    # Clear screen first
+    print("\033c", end="")
     
-    # Print header
-    print('=' * 50)
-    print('GRADEBOOK MANAGEMENT SYSTEM'.center(50))
-    print('=' * 50)
-    print()
+    # Animated header
+    header = "🎓 GRADEBOOK MANAGEMENT SYSTEM 🎓"
+    print(Fore.CYAN + Style.BRIGHT + "=" * 50)
+    print_with_animation(Fore.YELLOW + Style.BRIGHT + header.center(50))
+    print(Fore.CYAN + Style.BRIGHT + "=" * 50 + "\n")
+
+    # Menu options with colors
+    menu_items = [
+        (Fore.GREEN + "1", "Add student"),
+        (Fore.RED + "2", "Delete student"),
+        (Fore.BLUE + "3", "View statistics about grades"),
+        (Fore.MAGENTA + "4", "View student grades"),
+        (Fore.YELLOW + "5", "Edit or Enter student grades"),
+        (Fore.CYAN + "6", "Print Gradebook"),
+        (Fore.WHITE + "m", "Print menu"),
+        (Fore.WHITE + "c", "Clear Screen"),
+        (Fore.RED + "q", "Quit system")
+    ]
+
+    for key, description in menu_items:
+        print_with_animation(f"{key}{Style.RESET_ALL} - {Fore.WHITE}{description}")
     
-    # Menu options without any color codes
-    print('1 - Add student')
-    print('2 - Delete student')
-    print('3 - View statistics about grades')
-    print('4 - View student grades')
-    print('5 - Edit or Enter student grades')
-    print('6 - Print Gradebook')
-    print('m - Print menu')
-    print('c - Clear Screen')
-    print('q - Quit system')
-    
-    print('\n' + '=' * 50 + '\n')
+    print("\n" + Fore.CYAN + Style.BRIGHT + "=" * 50 + Style.RESET_ALL + "\n")
+
 
 def main():
-    """Main function to run the gradebook application."""
+    """
+    Main function to run the gradebook application.
+    Handles user interaction and menu choices with animated feedback.
+    """
     gradebook = Gradebook()
     
-    print_with_animation("Starting Gradebook System...")
+    # Initial loading animation
+    print_with_animation(Fore.CYAN + "Starting Gradebook System...")
     loading_animation()
     
     while True:
         print_menu()
-        choice = input("Select an option: ").strip().lower()
+        choice = input(Fore.GREEN + "Select an option: " + Style.RESET_ALL).strip().lower()
         
         if choice == '1':
-            print("\n=== Adding New Student ===")
-            admin_no = input("Enter Admin Number: ").strip()
-            name = input("Enter Student Name: ").strip()
-            student = Student(admin_no, name)
+            print_with_animation(Fore.YELLOW + "\n=== Adding New Student ===")
+            admin_no = input(Fore.CYAN + "Enter Admin Number: " + Style.RESET_ALL).strip()
+            name = input(Fore.CYAN + "Enter Student Name: " + Style.RESET_ALL).strip()
+            student = Student(admin_no,name)
             loading_animation(0.5)
             if gradebook.add_student(student):
-                print(f"[SUCCESS] Student {name} added successfully.")
+                print(Fore.GREEN + f"✅ Student {name} added successfully.")
             else:
-                print(f"[ERROR] Student with Admin Number {admin_no} already exists.")
+                print(Fore.RED + f"❌ Student with Admin Number {admin_no} already exists.")
 
         elif choice == '2':
-            print("\n=== Deleting Student ===")
-            admin_no = input("Enter Admin Number to delete: ").strip()
+            print_with_animation(Fore.YELLOW + "\n=== Deleting Student ===")
+            admin_no = input(Fore.CYAN + "Enter Admin Number to delete: " + Style.RESET_ALL).strip()
             loading_animation(0.5)
             if gradebook.delete_student(admin_no):
-                print(f"[SUCCESS] Student with Admin Number {admin_no} deleted!")
+                print(Fore.GREEN + f"✅ Student with Admin Number {admin_no} deleted!")
             else:
-                print("[ERROR] Student not found!")
+                print(Fore.RED + "❌ Student not found!")
 
         elif choice == '3':
             stats = gradebook.view_statistics()
@@ -347,18 +376,18 @@ def main():
             print_menu()
 
         elif choice == 'c':
-            print('\n' * 50)  # Simple screen clear with newlines
+            print("\033c", end="")  # Clear screen
 
         elif choice == 'q':
-            print("\nSaving data...")
+            print_with_animation(Fore.YELLOW + "\nSaving data...")
             gradebook.save_data()
             loading_animation(1)
-            print("[GOODBYE] Thank you for using Gradebook System!")
+            print_with_animation(Fore.GREEN + "👋 Thank you for using Gradebook System. Goodbye!")
             break
         else:
-            print("[ERROR] Invalid choice. Please try again.")
+            print(Fore.RED + "❌ Invalid choice. Please try again.")
         
-        input("\nPress Enter to continue...")
+        input(Fore.YELLOW + "\nPress Enter to continue..." + Style.RESET_ALL)
 
 
 if __name__ == "__main__":
